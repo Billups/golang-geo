@@ -1,4 +1,4 @@
-package geo
+package geocoder
 
 import (
 	"fmt"

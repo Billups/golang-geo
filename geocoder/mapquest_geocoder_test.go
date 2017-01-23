@@ -1,9 +1,11 @@
-package geo
+package geocoder
 
 import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	geo "github.com/Billups/golang-geo"
 )
 
 func TestSetMapquestAPIKey(t *testing.T) {
@@ -50,7 +52,7 @@ func TestMapquestGeocoderQueryStr(t *testing.T) {
 func TestMapquestReverseGeocoderQueryStr(t *testing.T) {
 	// Empty API Key
 	SetMapquestAPIKey("")
-	p := &Point{lat: 123.45, lng: 56.78}
+	p := geo.NewPoint(123.45, 56.78)
 	res, err := mapquestReverseGeocodeQueryStr(p)
 	if err != nil {
 		t.Errorf("Error creating query string: %v", err)

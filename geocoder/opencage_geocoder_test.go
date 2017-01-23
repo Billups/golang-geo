@@ -1,8 +1,10 @@
-package geo
+package geocoder
 
 import (
 	"fmt"
 	"testing"
+
+	geo "github.com/Billups/golang-geo"
 )
 
 func TestSetOpencageAPIKey(t *testing.T) {
@@ -49,7 +51,7 @@ func TestOpencageGeocoderQueryStr(t *testing.T) {
 func TestOpencageReverseGeocoderQueryStr(t *testing.T) {
 	// Empty API Key
 	SetOpenCageAPIKey("")
-	p := &Point{lat: 123.45, lng: 56.78}
+	p := geo.NewPoint(123.45, 56.78)
 	res, err := opencageReverseGeocodeQueryStr(p)
 	if err != nil {
 		t.Errorf("Error creating query string: %v", err)

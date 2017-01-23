@@ -1,8 +1,10 @@
-package geo
+package geocoder
 
 import (
 	"database/sql"
 	"fmt"
+
+	geo "github.com/Billups/golang-geo"
 )
 
 // A Mapper that uses Standard SQL Syntax to perform mapping functions and queries
@@ -30,11 +32,11 @@ func (s *SQLMapper) SqlDbConn() *sql.DB {
 // passed in from the origin point passed in.
 // Original implemenation from : http://www.movable-type.co.uk/scripts/latlong-db.html
 // Returns a pointer to a sql.Rows as a result, or an error if one occurs during the query.
-func (s *SQLMapper) PointsWithinRadius(p *Point, radius float64) (*sql.Rows, error) {
+func (s *SQLMapper) PointsWithinRadius(p *geo.Point, radius float64) (*sql.Rows, error) {
 	select_str := fmt.Sprintf("SELECT * FROM %v a", s.conf.table)
-	lat1 := fmt.Sprintf("sin(radians(%f)) * sin(radians(a.lat))", p.lat)
-	lng1 := fmt.Sprintf("cos(radians(%f)) * cos(radians(a.lat)) * cos(radians(a.lng) - radians(%f))", p.lat, p.lng)
-	where_str := fmt.Sprintf("WHERE acos(%s + %s) * %f <= %f", lat1, lng1, float64(EARTH_RADIUS), radius)
+	lat1 := fmt.Sprintf("sin(radians(%f)) * sin(radians(a.lat))", p.Lat())
+	lng1 := fmt.Sprintf("cos(radians(%f)) * cos(radians(a.lat)) * cos(radians(a.lng) - radians(%f))", p.Lat(), p.Lng())
+	where_str := fmt.Sprintf("WHERE acos(%s + %s) * %f <= %f", lat1, lng1, float64(geo.EARTH_RADIUS), radius)
 	query := fmt.Sprintf("%s %s", select_str, where_str)
 
 	res, err := s.sqlConn.Query(query)

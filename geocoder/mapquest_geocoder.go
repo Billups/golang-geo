@@ -1,4 +1,4 @@
-package geo
+package geocoder
 
 import (
 	"bytes"
@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+
+	geo "github.com/Billups/golang-geo"
 )
 
 // This struct contains all the funcitonality
@@ -81,7 +83,7 @@ func (g *MapQuestGeocoder) Request(url string) ([]byte, error) {
 
 // Returns the first point returned by MapQuest's geocoding service or an error
 // if one occurs during the geocoding request.
-func (g *MapQuestGeocoder) Geocode(address string) (*Point, error) {
+func (g *MapQuestGeocoder) Geocode(address string) (*geo.Point, error) {
 
 	queryStr, err := mapquestGeocodeQueryStr(address)
 	if err != nil {
@@ -97,7 +99,7 @@ func (g *MapQuestGeocoder) Geocode(address string) (*Point, error) {
 	json.Unmarshal(data, &res)
 
 	if len(res) == 0 {
-		return &Point{}, mapquestZeroResultsError
+		return &geo.Point{}, mapquestZeroResultsError
 	}
 
 	lat, err := strconv.ParseFloat(res[0].Lat, 64)
@@ -110,10 +112,7 @@ func (g *MapQuestGeocoder) Geocode(address string) (*Point, error) {
 		return nil, err
 	}
 
-	p := &Point{
-		lat: lat,
-		lng: lng,
-	}
+	p := geo.NewPoint(lat, lng)
 
 	return p, nil
 }
@@ -144,7 +143,7 @@ func mapquestGeocodeQueryStr(address string) (string, error) {
 
 // Returns the first most available address that corresponds to the passed in point.
 // It may also return an error if one occurs during execution.
-func (g *MapQuestGeocoder) ReverseGeocode(p *Point) (string, error) {
+func (g *MapQuestGeocoder) ReverseGeocode(p *geo.Point) (string, error) {
 	queryStr, err := mapquestReverseGeocodeQueryStr(p)
 	if err != nil {
 		return "", err
@@ -171,10 +170,10 @@ func (g *MapQuestGeocoder) ReverseGeocode(p *Point) (string, error) {
 	return resStr, nil
 }
 
-func mapquestReverseGeocodeQueryStr(p *Point) (string, error) {
+func mapquestReverseGeocodeQueryStr(p *geo.Point) (string, error) {
 	var queryBuf = bytes.NewBufferString("reverse.php?")
 
-	_, err := queryBuf.WriteString(fmt.Sprintf("lat=%f&lng=%f", p.lat, p.lng))
+	_, err := queryBuf.WriteString(fmt.Sprintf("lat=%f&lng=%f", p.Lat(), p.Lng()))
 	if err != nil {
 		return "", err
 	}

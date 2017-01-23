@@ -1,4 +1,4 @@
-package geo
+package geocoder
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	geo "github.com/Billups/golang-geo"
 )
 
 // This struct contains all the funcitonality
@@ -87,7 +89,7 @@ func (g *GoogleGeocoder) Request(params string) ([]byte, error) {
 
 // Geocodes the passed in query string and returns a pointer to a new Point struct.
 // Returns an error if the underlying request cannot complete.
-func (g *GoogleGeocoder) Geocode(address string) (*Point, error) {
+func (g *GoogleGeocoder) Geocode(address string) (*geo.Point, error) {
 	queryStr, err := googleGeocodeQueryStr(address)
 	if err != nil {
 		return nil, err
@@ -108,10 +110,7 @@ func (g *GoogleGeocoder) Geocode(address string) (*Point, error) {
 	lat := res.Results[0].Geometry.Location.Lat
 	lng := res.Results[0].Geometry.Location.Lng
 
-	point := &Point{
-		lat: lat,
-		lng: lng,
-	}
+	point := geo.NewPoint(lat, lng)
 
 	return point, nil
 }
@@ -137,7 +136,7 @@ func googleGeocodeQueryStr(address string) (string, error) {
 
 // Reverse geocodes the pointer to a Point struct and returns the first address that matches
 // or returns an error if the underlying request cannot complete.
-func (g *GoogleGeocoder) ReverseGeocode(p *Point) (string, error) {
+func (g *GoogleGeocoder) ReverseGeocode(p *geo.Point) (string, error) {
 	queryStr, err := googleReverseGeocodeQueryStr(p)
 	if err != nil {
 		return "", err
@@ -161,9 +160,9 @@ func (g *GoogleGeocoder) ReverseGeocode(p *Point) (string, error) {
 	return res.Results[0].FormattedAddress, err
 }
 
-func googleReverseGeocodeQueryStr(p *Point) (string, error) {
+func googleReverseGeocodeQueryStr(p *geo.Point) (string, error) {
 	var queryStr = bytes.NewBufferString("")
-	_, err := queryStr.WriteString(fmt.Sprintf("latlng=%f,%f", p.lat, p.lng))
+	_, err := queryStr.WriteString(fmt.Sprintf("latlng=%f,%f", p.Lat(), p.Lng()))
 	if err != nil {
 		return "", err
 	}
@@ -175,5 +174,5 @@ func googleReverseGeocodeQueryStr(p *Point) (string, error) {
 		}
 	}
 
-	return queryStr.String(), err
+	return queryStr.String(), nil
 }

@@ -1,4 +1,4 @@
-package geo
+package geocoder
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"os"
 	"path"
 	"testing"
+
+	geo "github.com/Billups/golang-geo"
 )
 
 func TestSetGoogleAPIKey(t *testing.T) {
@@ -52,7 +54,7 @@ func TestGoogleGeocoderQueryStr(t *testing.T) {
 func TestGoogleReverseGeocoderQueryStr(t *testing.T) {
 	// Empty API Key
 	SetGoogleAPIKey("")
-	p := &Point{lat: 123.45, lng: 56.78}
+	p := geo.NewPoint(123.45, 56.78)
 	res, err := googleReverseGeocodeQueryStr(p)
 	if err != nil {
 		t.Errorf("Error creating query string: %v", err)

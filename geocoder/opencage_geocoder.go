@@ -1,4 +1,4 @@
-package geo
+package geocoder
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	geo "github.com/Billups/golang-geo"
 )
 
 // This struct contains all the funcitonality
@@ -81,7 +83,7 @@ func (g *OpenCageGeocoder) Request(url string) ([]byte, error) {
 
 // Returns the first point returned by OpenCage's geocoding service or an error
 // if one occurs during the geocoding request.
-func (g *OpenCageGeocoder) Geocode(address string) (*Point, error) {
+func (g *OpenCageGeocoder) Geocode(address string) (*geo.Point, error) {
 
 	queryStr, err := opencageGeocodeQueryStr(address)
 	if err != nil {
@@ -103,10 +105,7 @@ func (g *OpenCageGeocoder) Geocode(address string) (*Point, error) {
 	lat := res.Results[0].Geometry.Lat
 	lng := res.Results[0].Geometry.Lng
 
-	point := &Point{
-		lat: lat,
-		lng: lng,
-	}
+	point := geo.NewPoint(lat, lng)
 
 	return point, nil
 }
@@ -137,7 +136,7 @@ func opencageGeocodeQueryStr(address string) (string, error) {
 
 // Returns the first most available address that corresponds to the passed in point.
 // It may also return an error if one occurs during execution.
-func (g *OpenCageGeocoder) ReverseGeocode(p *Point) (string, error) {
+func (g *OpenCageGeocoder) ReverseGeocode(p *geo.Point) (string, error) {
 	queryStr, err := opencageReverseGeocodeQueryStr(p)
 	if err != nil {
 		return "", err
@@ -161,9 +160,9 @@ func (g *OpenCageGeocoder) ReverseGeocode(p *Point) (string, error) {
 	return res.Results[0].Formatted, nil
 }
 
-func opencageReverseGeocodeQueryStr(p *Point) (string, error) {
+func opencageReverseGeocodeQueryStr(p *geo.Point) (string, error) {
 	var queryStr = bytes.NewBufferString("?")
-	_, err := queryStr.WriteString(fmt.Sprintf("q=%f,%f", p.lat, p.lng))
+	_, err := queryStr.WriteString(fmt.Sprintf("q=%f,%f", p.Lat(), p.Lng()))
 	if err != nil {
 		return "", err
 	}
@@ -180,5 +179,5 @@ func opencageReverseGeocodeQueryStr(p *Point) (string, error) {
 		return "", err
 	}
 
-	return queryStr.String(), err
+	return queryStr.String(), nil
 }
